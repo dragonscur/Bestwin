@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bestwin - Pronostici Calcio</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background-color: #f5f9ff;
+      color: #1a1a1a;
+    }
+    /* Banner grande */
+    .hero {
+      background: linear-gradient(135deg, #0a1d44, #114a8c);
+      color: white;
+      text-align: center;
+      padding: 4rem 1rem 3rem 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "⚽";
+      font-size: 10rem;
+      color: rgba(255, 255, 255, 0.05);
+      position: absolute;
+      bottom: -20px;
+      right: 20px;
+      transform: rotate(-20deg);
+    }
+    .hero h1 {
+      font-size: 3rem;
+      margin: 0;
+      letter-spacing: 2px;
+      font-weight: 800;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      margin-top: 0.8rem;
+      color: #dfefff;
+    }
+    /* Header più piccolo sotto banner */
+    header {
+      background: #0a1d44;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      letter-spacing: 1px;
+    }
+    header span {
+      color: #66ccff;
+    }
+    /* Corpo */
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    .widget-box {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      border-top: 6px solid #0a1d44;
+      transition: transform 0.2s ease;
+    }
+    .widget-box:hover {
+      transform: translateY(-3px);
+    }
+    h2 {
+      text-align: center;
+      color: #114a8c;
+      margin-bottom: 1rem;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #dfefff;
+      padding: 2rem 0;
+      background: #0a1d44;
+      margin-top: 2rem;
+    }
+    footer a {
+      color: #66ccff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero Banner -->
+  <div class="hero">
+    <h1>Bestwin</h1>
+    <p>Pronostici & Quote Calcio in Tempo Reale</p >
+  </div>
+
+  <!-- Header piccolo -->
+  <header>⚽ <span>Live Odds</span> & Pronostici</header>
+  
+  <main>
+    <div class="widget-box">
+      <!-- Qui incolla il codice Oddspedia Widget -->
+      <h2>Quote Live Calcio</h2>
+      <div id="oddspedia-widget"></div>
+    </div>
+  </main>
+  
+  <footer>
+    © 2025 Bestwin • Powered by Oddspedia
+  </footer>
+
+  <!-- Script Oddspedia (sostituisci con quello che ti danno loro) -->
+  <script src="https://widgets.oddspedia.com/js/widget/init.js"></script>
+  <script>
+    window.oddspediaWidget.initWidget('oddspedia-widget', {
+      widget: 'odds_comparison',
+      sport: 'football',
+      primaryColor: '#114a8c',
+      accentColor: '#66ccff'
+    });
+  </script>
+</body>
+</html>

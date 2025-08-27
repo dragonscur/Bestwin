@@ -3,90 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pronostici Calcio - Live Odds</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background-color: #f9f9f9;
-      color: #222;
-    }
-    header {
-      background: linear-gradient(90deg, #1db954, #0a7c2f);
-      color: white;
-      text-align: center;
-      padding: 1.5rem;
-      font-size: 1.8rem;
-      font-weight: bold;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    }
-    main {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 1rem;
-    }
-    .widget-box {
-      background: white;
-      border-radius: 12px;
-      padding: 1rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-    footer {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #666;
-      padding: 1.5rem 0;
-    }
-    .custom-footer {
-      text-align: center;
-      margin-top: 2rem;
-      margin-bottom: 1.5rem;
-      color: #777;
-      border-top: 1px solid rgba(0,0,0,0.1);
-      padding-top: 1rem;
-      font-size: 0.85rem;
-    }
-    .custom-footer a img {
-      height: 32px;
-      opacity: 0.7;
-      transition: opacity 0.3s;
-    }
-    .custom-footer a img:hover {
-      opacity: 1;
-    }
-  </style>
+  <title>BestWin - Pronostici Sportivi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <header> Pronostici &amp; Quote in Tempo Reale</header>
-  
-  <main>
-    <div class="widget-box">
-      <!-- Qui incolla il codice Oddspedia Widget -->
-      <h2 style="text-align:center; color:#0a7c2f;">Quote Live</h2>
-      <div id="oddspedia-widget"></div>
+<body class="bg-gradient-to-b from-blue-900 via-blue-700 to-blue-500 text-white min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="p-6 text-center">
+    <h1 class="text-4xl font-bold">BestWin</h1>
+    <p class="text-lg mt-2">Pronostici sportivi intelligenti e gratuiti</p >
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 container mx-auto p-6">
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <!-- Example Card -->
+      <div class="bg-white text-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-2xl transition">
+        <h2 class="text-xl font-semibold text-blue-700 mb-2">Juventus vs Milan</h2>
+        <p class="mb-4">Over 2.5 Goals - Probabilità: 68%</p >
+        <button class="bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded-xl">Dettagli</button>
+      </div>
+
+      <div class="bg-white text-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-2xl transition">
+        <h2 class="text-xl font-semibold text-blue-700 mb-2">Inter vs Roma</h2>
+        <p class="mb-4">Goal Successivo: Inter - Probabilità: 72%</p >
+        <button class="bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded-xl">Dettagli</button>
+      </div>
+
+      <div class="bg-white text-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-2xl transition">
+        <h2 class="text-xl font-semibold text-blue-700 mb-2">Napoli vs Lazio</h2>
+        <p class="mb-4">Under 3.5 Goals - Probabilità: 63%</p >
+        <button class="bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded-xl">Dettagli</button>
+      </div>
+    </div>
+
+    <!-- Oddspedia Standings Widget -->
+    <div class="bg-white text-gray-800 rounded-2xl shadow-lg p-6 mt-10">
+      <h2 class="text-xl font-semibold text-blue-700 mb-4">Classifica Serie A</h2>
+      <div id="oddspedia-widget-standings-league-id-79"></div>
     </div>
   </main>
-  
-  <!-- 混合版 Footer -->
-  <footer class="custom-footer">
-    <p>Dati forniti da</p >
-    < a href=" " target="_blank" rel="nofollow">
+
+  <!-- Footer -->
+  <footer class="text-center mt-10 mb-6 text-gray-300 border-t border-gray-500/40 pt-6">
+    <p class="mb-2">Dati forniti da</p >
+    < a href=" " target="_blank" rel="nofollow" class="inline-block">
       < img 
-        src="https://widgets.oddspedia.com/img/static/Oddspedia_logo.svg"
-        alt="Oddspedia Logo"
+        src="https://oddspedia.com/images/logo/logo-dark.svg" 
+        alt="Oddspedia Logo" 
+        class="mx-auto h-8 opacity-80 hover:opacity-100 transition"
       >
     </ a>
-    <p> 2025 BestWin – Tutti i diritti riservati</p >
+    <p class="text-sm mt-4"> 2025 BestWin - Tutti i diritti riservati</p >
   </footer>
 
-  <script src="https://widgets.oddspedia.com/js/widget/init.js"></script>
+  <!-- Oddspedia Widget Script -->
   <script>
-    window.oddspediaWidget.initWidget('oddspedia-widget', {
-      widget: 'odds_comparison',
-      sport: 'football',
-      primaryColor: '#1db954',
-      accentColor: '#0a7c2f'
-    });
+    window.oddspediaWidgetStandingsLeagueId79 = {
+      api_token: "979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593ae3",
+      type: "standings",
+      domain: "dragonscur.github.io/Bestwin/",
+      selector: "oddspedia-widget-standings-league-id-79",
+      width: "100%",
+      theme: "0",
+      language: "it",
+      primary_color: "#000000",
+      accent_color: "#2966FF",
+      font: "Roboto",
+      league_id: "79",
+      visible_results: "4",
+    };
   </script>
+  <script src="https://widgets.oddspedia.com/js/widget/init.js?widgetId=oddspediaWidgetStandingsLeagueId79" async></script>
+
 </body>
 </html>

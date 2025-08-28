@@ -98,6 +98,42 @@
       </div>
     </section>
  
+    <!-- Oddspedia Live Score Widget -->
+    <section class="mb-8">
+      <div class="bg-white bg-opacity-95 text-gray-800 rounded-2xl shadow-custom p-6 mt-6"> 
+        <div class="flex items-center mb-4">
+          <div class="w-1.5 h-6 bg-blue-600 rounded-full mr-3"></div>
+          <h2 class="text-2xl font-semibold text-primary">Risultati in Diretta</h2>
+        </div>
+        <div id="oddspedia-widget-live-score-popular-false-sports-false-leagues-false" class="mt-4">
+          <script>
+            window.oddspediaWidgetLiveScorePopularSportsLeagues = { 
+              api_token: "979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593ae3", 
+              type: "live-score", 
+              domain: "dragonscur.github.io/Bestwin/", 
+              selector: "oddspedia-widget-live-score-popular-false-sports-false-leagues-false", 
+              width: "0", 
+              theme: "0", 
+              odds_type: "1", 
+              language: "it", 
+              primary_color: "#283E5B", 
+              accent_color: "#00B1FF", 
+              font: "Roboto", 
+              logos: "true", 
+              inplay_only: "false", 
+              extended_match_info: "true", 
+              live_stream: "true", 
+              limit: "15", 
+              popular: "false", 
+              sports: "", 
+              leagues: "", 
+            };
+          </script>
+          <script src="https://widgets.oddspedia.com/js/widget/init.js?widgetId=oddspediaWidgetLiveScorePopularSportsLeagues" async></script>
+        </div>
+      </div>
+    </section>
+    
     <!-- Oddspedia Standings Widget --> 
     <section>
       <div class="bg-white bg-opacity-95 text-gray-800 rounded-2xl shadow-custom p-6 mt-6"> 
@@ -170,12 +206,12 @@
       <div class="border-t border-blue-800/30 pt-6 flex flex-col md:flex-row justify-between items-center">
         <p class="text-sm text-blue-200 mb-4 md:mb-0">© 2025 BestWin - Tutti i diritti riservati</p>
         <div class="flex items-center">
-          <p class="text-sm text-blue-200 mr-3">Dati forniti da</p>
-          <a href="https://oddspedia.com" target="_blank" rel="nofollow" class="inline-block"> 
+          <a href="https://oddspedia.com" target="_blank" rel="nofollow" class="flex items-center hover:opacity-100 transition"> 
+            <span class="text-sm text-blue-200 mr-2">Powered by</span>
             <img  
               src="https://oddspedia.com/images/logo/logo-dark.svg"  
               alt="Oddspedia Logo"  
-              class="h-6 opacity-80 hover:opacity-100 transition" 
+              class="h-6" 
             > 
           </a>
         </div>
@@ -203,4 +239,4 @@
   <script src="https://widgets.oddspedia.com/js/widget/init.js?widgetId=oddspediaWidgetStandingsLeagueId79" async></script>
  
 </body> 
-</html>
+</html

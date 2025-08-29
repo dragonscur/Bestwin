@@ -1,181 +1,234 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<title>Ultimate Match Center</title>
-<style>
-body { font-family: Arial, sans-serif; background: #f0f4f8; padding: 20px; }
-h2 { margin-top: 20px; }
-select, button { padding: 5px 10px; margin: 5px 0; }
-.match { padding: 10px; margin-bottom: 10px; background: #fff; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.match strong { font-size: 1.1em; }
-.odds-table { margin-top: 5px; border-collapse: collapse; width: 100%; }
-.odds-table th, .odds-table td { border: 1px solid #ddd; padding: 5px; text-align: center; }
-.odds-table th { background-color: #007bff; color: white; }
-.odds-table td.best { background-color: #d1f0d1; font-weight: bold; }
-.toggle-btn { cursor: pointer; color: #007bff; text-decoration: underline; margin-top: 5px; display: inline-block; }
-.hidden { display: none; }
-#refreshBtn { background-color: #007bff; color: #fff; border: none; cursor: pointer; border-radius: 4px; }
-#refreshBtn:hover { background-color: #0056b3; }
-footer { text-align: center; margin-top: 20px; color: #666; font-size: 0.9em; }
-footer img { vertical-align: middle; width: 100px; margin-left: 5px; }
-</style>
-</head>
-<body>
+<!DOCTYPE html> 
+<html lang="it"> 
+<head> 
+<meta charset="UTF-8"> 
+<title>Ultimate Match Center</title> 
+<style> 
+body { font-family: Arial, sans-serif; background: #f0f4f8; padding: 20px; } 
+h2 { margin-top: 20px; } 
+select, button { padding: 5px 10px; margin: 5px 0; } 
+.match { padding: 10px; margin-bottom: 10px; background: #fff; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); } 
+.match strong { font-size: 1.1em; } 
+.odds-table { margin-top: 5px; border-collapse: collapse; width: 100%; } 
+.odds-table th, .odds-table td { border: 1px solid #ddd; padding: 5px; text-align: center; } 
+.odds-table th { background-color: #007bff; color: white; } 
+.odds-table td.best { background-color: #d1f0d1; font-weight: bold; } 
+.toggle-btn { cursor: pointer; color: #007bff; text-decoration: underline; margin-top: 5px; display: inline-block; } 
+.hidden { display: none; } 
+#refreshBtn { background-color: #007bff; color: #fff; border: none; cursor: pointer; border-radius: 4px; } 
+#refreshBtn:hover { background-color: #0056b3; } 
+footer { text-align: center; margin-top: 20px; color: #666; font-size: 0.9em; } 
+footer img { vertical-align: middle; width: 100px; margin-left: 5px; } 
+</style> 
+</head> 
+<body> 
 
-<h2>Seleziona lo sport</h2>
-<select id="sportSelect">
-  <option value="1" selected>Calcio</option>
-  <option value="2">Basket</option>
-  <option value="3">Tennis</option>
-</select>
+<h2>Seleziona lo sport</h2> 
+<select id="sportSelect"> 
+  <option value="1" selected>Calcio</option> 
+  <option value="2">Basket</option> 
+  <option value="3">Tennis</option> 
+</select> 
 
-<h2>Seleziona il torneo</h2>
-<select id="tournamentSelect">
-  <option value="">-- Caricamento tornei --</option>
-</select>
-<button id="refreshBtn">Aggiorna partite</button>
+<h2>Seleziona il torneo</h2> 
+<select id="tournamentSelect"> 
+  <option value="">-- Caricamento tornei --</option> 
+</select> 
+<button id="refreshBtn">Aggiorna partite</button> 
 
-<div id="matchCenter"></div>
+<div id="matchCenter"></div> 
 
-<footer>
-  Powered by < a href=" " target="_blank">
-    < img src="https://widgets.oddspedia.com/images/logo-oddspedia-dark.svg" alt="Oddspedia Logo">
-  </ a>
-</footer>
+<footer> 
+  Powered by <a href="https://oddspedia.com" target="_blank"> 
+    <img src="https://widgets.oddspedia.com/images/logo-oddspedia-dark.svg" alt="Oddspedia Logo"> 
+  </a> 
+</footer> 
 
-<script>
-const apiToken = '979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593';
-let currentSport = 1;
-let currentLeague = null;
+<script> 
+const apiToken = '979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593ae3';
 
-// 加载赛事
-async function loadTournaments(sportId) {
-  const url = `https://widgets.oddspedia.com/api/tournaments?api_token=${apiToken}&sport_id=${sportId}&lang=it`;
-  const res = await fetch(url);
-  const data = await res.json();
-  const select = document.getElementById('tournamentSelect');
-  select.innerHTML = '<option value="">-- Seleziona torneo --</option>';
-  data.forEach(t => {
-    const option = document.createElement('option');
-    option.value = t.id;
-    option.textContent = t.name;
-    select.appendChild(option);
-  });
-  currentLeague = null;
-  document.getElementById('matchCenter').innerHTML = '';
-}
-
-// 加载比赛和赔率
-async function loadMatches(leagueId) {
-  if (!leagueId) return;
-  const url = `https://widgets.oddspedia.com/api/matches?api_token=${apiToken}&league_id=${leagueId}&lang=it`;
-  const res = await fetch(url);
-  const matches = await res.json();
+// 添加错误处理
+const handleApiError = (error, context) => {
+  console.error(`Error in ${context}:`, error);
   const container = document.getElementById('matchCenter');
-  container.innerHTML = '';
+  container.innerHTML += `<div class="match"><p style="color:red">Errore durante il caricamento dei dati: ${error.message}</p></div>`;
+}; 
 
-  matches.forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'match';
+let currentSport = 1; 
+let currentLeague = null; 
+
+// 加载赛事 
+async function loadTournaments(sportId) { 
+  try {
+    const url = `https://widgets.oddspedia.com/api/tournaments?api_token=${apiToken}&sport_id=${sportId}&lang=it`; 
+    console.log('Loading tournaments from:', url);
+    const res = await fetch(url); 
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    const data = await res.json(); 
+    console.log('Tournaments data:', data);
     
-    div.innerHTML = `
-      <strong>${m.home_team} vs ${m.away_team}</strong><br>
-      Orario: ${m.start_time} | Stato: ${m.status}<br>
-    `;
+    const select = document.getElementById('tournamentSelect'); 
+    select.innerHTML = '<option value="">-- Seleziona torneo --</option>'; 
+    
+    if (Array.isArray(data)) {
+      data.forEach(t => { 
+        const option = document.createElement('option'); 
+        option.value = t.id; 
+        option.textContent = t.name; 
+        select.appendChild(option); 
+      }); 
+    } else if (data.error) {
+      throw new Error(data.error);
+    } else {
+      throw new Error('Formato dati non valido');
+    }
+    
+    currentLeague = null; 
+    document.getElementById('matchCenter').innerHTML = ''; 
+  } catch (error) {
+    handleApiError(error, 'loadTournaments');
+    const select = document.getElementById('tournamentSelect');
+    select.innerHTML = '<option value="">-- Errore di caricamento --</option>';
+  }
+} 
 
-    // 主要盘口显示表格
-    if(m.bookmakers && m.bookmakers.length > 0){
-      const table = document.createElement('table');
-      table.className = 'odds-table';
-      table.innerHTML = `<tr><th>Bookmaker</th><th>1</th><th>X</th><th>2</th></tr>`;
-
-      m.bookmakers.forEach(b => {
-        const market = b.markets.find(market => market.name === '1X2');
-        if(market && market.outcomes){
-          const home = market.outcomes.find(o=>o.name==='1')?.price || '-';
-          const draw = market.outcomes.find(o=>o.name==='X')?.price || '-';
-          const away = market.outcomes.find(o=>o.name==='2')?.price || '-';
-
-          const row = document.createElement('tr');
-          row.innerHTML = `<td>${b.name}</td><td>${home}</td><td>${draw}</td><td>${away}</td>`;
-          table.appendChild(row);
-        }
-      });
-
-      // 高亮最优赔率
-      ['1','X','2'].forEach(col => {
-        let max = 0;
-        Array.from(table.rows).slice(1).forEach(row=>{
-          const val = parseFloat(row.cells[col==='1'?1:col==='X'?2:3].textContent)||0;
-          if(val>max) max=val;
-        });
-        Array.from(table.rows).slice(1).forEach(row=>{
-          const val = parseFloat(row.cells[col==='1'?1:col==='X'?2:3].textContent)||0;
-          if(val===max && val>0) row.cells[col==='1'?1:col==='X'?2:3].classList.add('best');
-        });
-      });
-
-      div.appendChild(table);
+// 加载比赛和赔率 
+async function loadMatches(leagueId) { 
+  try {
+    if (!leagueId) return; 
+    const url = `https://widgets.oddspedia.com/api/matches?api_token=${apiToken}&league_id=${leagueId}&lang=it`; 
+    console.log('Loading matches from:', url);
+    const res = await fetch(url); 
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    const data = await res.json(); 
+    console.log('Matches data:', data);
+    
+    const container = document.getElementById('matchCenter'); 
+    container.innerHTML = ''; 
+    
+    if (!Array.isArray(data)) {
+      if (data.error) {
+        throw new Error(data.error);
+      } else {
+        throw new Error('Formato dati non valido');
+      }
+    }
+    
+    if (data.length === 0) {
+      container.innerHTML = '<div class="match"><p>Nessuna partita disponibile per questo torneo.</p></div>';
+      return;
     }
 
-    // 其他盘口折叠显示
-    if(m.bookmakers && m.bookmakers.length > 0){
-      const otherDiv = document.createElement('div');
-      otherDiv.className = 'hidden';
-      m.bookmakers.forEach(b=>{
-        b.markets.forEach(market=>{
-          if(!['1X2','Over/Under','Goal Successivo'].includes(market.name)){
-            const p = document.createElement('p');
-            p.textContent = `${b.name} - ${market.name}`;
-            otherDiv.appendChild(p);
+    data.forEach(m => { 
+      const div = document.createElement('div'); 
+      div.className = 'match'; 
+      
+      div.innerHTML = ` 
+        <strong>${m.home_team || 'Squadra Casa'} vs ${m.away_team || 'Squadra Trasferta'}</strong><br> 
+        Orario: ${m.start_time || 'N/A'} | Stato: ${m.status || 'N/A'}<br> 
+      `; 
+
+      // 主要盘口显示表格 
+      if(m.bookmakers && m.bookmakers.length > 0){ 
+        const table = document.createElement('table'); 
+        table.className = 'odds-table'; 
+        table.innerHTML = `<tr><th>Bookmaker</th><th>1</th><th>X</th><th>2</th></tr>`; 
+
+        m.bookmakers.forEach(b => { 
+          const market = b.markets ? b.markets.find(market => market.name === '1X2') : null; 
+          if(market && market.outcomes){ 
+            const home = market.outcomes.find(o=>o.name==='1')?.price || '-'; 
+            const draw = market.outcomes.find(o=>o.name==='X')?.price || '-'; 
+            const away = market.outcomes.find(o=>o.name==='2')?.price || '-'; 
+
+            const row = document.createElement('tr'); 
+            row.innerHTML = `<td>${b.name || 'Bookmaker'}</td><td>${home}</td><td>${draw}</td><td>${away}</td>`; 
+            table.appendChild(row); 
+          } 
+        }); 
+
+        // 高亮最优赔率 
+        ['1','X','2'].forEach(col => { 
+          let max = 0; 
+          Array.from(table.rows).slice(1).forEach(row=>{ 
+            const val = parseFloat(row.cells[col==='1'?1:col==='X'?2:3].textContent)||0; 
+            if(val>max) max=val; 
+          }); 
+          Array.from(table.rows).slice(1).forEach(row=>{ 
+            const val = parseFloat(row.cells[col==='1'?1:col==='X'?2:3].textContent)||0; 
+            if(val===max && val>0) row.cells[col==='1'?1:col==='X'?2:3].classList.add('best'); 
+          }); 
+        }); 
+
+        div.appendChild(table); 
+        
+        // 其他盘口折叠显示 
+        const otherDiv = document.createElement('div'); 
+        otherDiv.className = 'hidden'; 
+        m.bookmakers.forEach(b=>{ 
+          if(b.markets) {
+            b.markets.forEach(market=>{ 
+              if(market && market.name && !['1X2','Over/Under','Goal Successivo'].includes(market.name)){ 
+                const p = document.createElement('p'); 
+                p.textContent = `${b.name} - ${market.name}`; 
+                otherDiv.appendChild(p); 
+              } 
+            }); 
           }
-        });
-      });
-      const toggleBtn = document.createElement('span');
-      toggleBtn.textContent = 'Mostra altri mercati';
-      toggleBtn.className = 'toggle-btn';
-      toggleBtn.addEventListener('click', ()=>{
-        if(otherDiv.classList.contains('hidden')){
-          otherDiv.classList.remove('hidden');
-          toggleBtn.textContent = 'Nascondi altri mercati';
-        } else {
-          otherDiv.classList.add('hidden');
-          toggleBtn.textContent = 'Mostra altri mercati';
-        }
-      });
-      div.appendChild(toggleBtn);
-      div.appendChild(otherDiv);
-    }
+        }); 
+        
+        const toggleBtn = document.createElement('span'); 
+        toggleBtn.textContent = 'Mostra altri mercati'; 
+        toggleBtn.className = 'toggle-btn'; 
+        toggleBtn.addEventListener('click', ()=>{ 
+          if(otherDiv.classList.contains('hidden')){ 
+            otherDiv.classList.remove('hidden'); 
+            toggleBtn.textContent = 'Nascondi altri mercati'; 
+          } else { 
+            otherDiv.classList.add('hidden'); 
+            toggleBtn.textContent = 'Mostra altri mercati'; 
+          } 
+        }); 
+        div.appendChild(toggleBtn); 
+        div.appendChild(otherDiv); 
+      }
+      
+      container.appendChild(div);
+    });
+  } catch (error) {
+    handleApiError(error, 'loadMatches');
+  }
+} 
 
-    container.appendChild(div);
-  });
-}
+// 事件绑定 
+document.getElementById('sportSelect').addEventListener('change', (e) => { 
+  currentSport = e.target.value; 
+  loadTournaments(currentSport); 
+}); 
 
-// 事件绑定
-document.getElementById('sportSelect').addEventListener('change', (e) => {
-  currentSport = e.target.value;
-  loadTournaments(currentSport);
-});
+document.getElementById('tournamentSelect').addEventListener('change', (e) => { 
+  currentLeague = e.target.value; 
+  loadMatches(currentLeague); 
+}); 
 
-document.getElementById('tournamentSelect').addEventListener('change', (e) => {
-  currentLeague = e.target.value;
-  loadMatches(currentLeague);
-});
+document.getElementById('refreshBtn').addEventListener('click', () => { 
+  if(currentLeague) loadMatches(currentLeague); 
+}); 
 
-document.getElementById('refreshBtn').addEventListener('click', () => {
-  if(currentLeague) loadMatches(currentLeague);
-});
+// 初始化加载 
+loadTournaments(currentSport); 
 
-// 初始化加载
-loadTournaments(currentSport);
+// 自动刷新每 15 秒 
+setInterval(() => { 
+  if(currentLeague) loadMatches(currentLeague); 
+}, 15000); 
 
-// 自动刷新每 15 秒
-setInterval(() => {
-  if(currentLeague) loadMatches(currentLeague);
-}, 15000);
+</script> 
 
-</script>
-
-</body>
+</body> 
 </html>
+ 

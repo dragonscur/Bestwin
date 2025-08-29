@@ -1,276 +1,181 @@
-<!DOCTYPE html> 
-<html lang="it"> 
-<head> 
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>BestWin - Pronostici Sportivi</title> 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'primary': '#1e3a8a',
-            'secondary': '#3b82f6',
-            'accent': '#dbeafe',
-          },
-          boxShadow: {
-            'custom': '0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1)',
-          },
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Ultimate Match Center</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f0f4f8; padding: 20px; }
+h2 { margin-top: 20px; }
+select, button { padding: 5px 10px; margin: 5px 0; }
+.match { padding: 10px; margin-bottom: 10px; background: #fff; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.match strong { font-size: 1.1em; }
+.odds-table { margin-top: 5px; border-collapse: collapse; width: 100%; }
+.odds-table th, .odds-table td { border: 1px solid #ddd; padding: 5px; text-align: center; }
+.odds-table th { background-color: #007bff; color: white; }
+.odds-table td.best { background-color: #d1f0d1; font-weight: bold; }
+.toggle-btn { cursor: pointer; color: #007bff; text-decoration: underline; margin-top: 5px; display: inline-block; }
+.hidden { display: none; }
+#refreshBtn { background-color: #007bff; color: #fff; border: none; cursor: pointer; border-radius: 4px; }
+#refreshBtn:hover { background-color: #0056b3; }
+footer { text-align: center; margin-top: 20px; color: #666; font-size: 0.9em; }
+footer img { vertical-align: middle; width: 100px; margin-left: 5px; }
+</style>
+</head>
+<body>
+
+<h2>Seleziona lo sport</h2>
+<select id="sportSelect">
+  <option value="1" selected>Calcio</option>
+  <option value="2">Basket</option>
+  <option value="3">Tennis</option>
+</select>
+
+<h2>Seleziona il torneo</h2>
+<select id="tournamentSelect">
+  <option value="">-- Caricamento tornei --</option>
+</select>
+<button id="refreshBtn">Aggiorna partite</button>
+
+<div id="matchCenter"></div>
+
+<footer>
+  Powered by < a href=" " target="_blank">
+    < img src="https://widgets.oddspedia.com/images/logo-oddspedia-dark.svg" alt="Oddspedia Logo">
+  </ a>
+</footer>
+
+<script>
+const apiToken = '979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593';
+let currentSport = 1;
+let currentLeague = null;
+
+// 加载赛事
+async function loadTournaments(sportId) {
+  const url = `https://widgets.oddspedia.com/api/tournaments?api_token=${apiToken}&sport_id=${sportId}&lang=it`;
+  const res = await fetch(url);
+  const data = await res.json();
+  const select = document.getElementById('tournamentSelect');
+  select.innerHTML = '<option value="">-- Seleziona torneo --</option>';
+  data.forEach(t => {
+    const option = document.createElement('option');
+    option.value = t.id;
+    option.textContent = t.name;
+    select.appendChild(option);
+  });
+  currentLeague = null;
+  document.getElementById('matchCenter').innerHTML = '';
+}
+
+// 加载比赛和赔率
+async function loadMatches(leagueId) {
+  if (!leagueId) return;
+  const url = `https://widgets.oddspedia.com/api/matches?api_token=${apiToken}&league_id=${leagueId}&lang=it`;
+  const res = await fetch(url);
+  const matches = await res.json();
+  const container = document.getElementById('matchCenter');
+  container.innerHTML = '';
+
+  matches.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'match';
+    
+    div.innerHTML = `
+      <strong>${m.home_team} vs ${m.away_team}</strong><br>
+      Orario: ${m.start_time} | Stato: ${m.status}<br>
+    `;
+
+    // 主要盘口显示表格
+    if(m.bookmakers && m.bookmakers.length > 0){
+      const table = document.createElement('table');
+      table.className = 'odds-table';
+      table.innerHTML = `<tr><th>Bookmaker</th><th>1</th><th>X</th><th>2</th></tr>`;
+
+      m.bookmakers.forEach(b => {
+        const market = b.markets.find(market => market.name === '1X2');
+        if(market && market.outcomes){
+          const home = market.outcomes.find(o=>o.name==='1')?.price || '-';
+          const draw = market.outcomes.find(o=>o.name==='X')?.price || '-';
+          const away = market.outcomes.find(o=>o.name==='2')?.price || '-';
+
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${b.name}</td><td>${home}</td><td>${draw}</td><td>${away}</td>`;
+          table.appendChild(row);
         }
-      }
-    }
-  </script>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-    }
-    .card-hover {
-      transition: all 0.3s ease;
-    }
-    .card-hover:hover {
-      transform: translateY(-5px);
-    }
-  </style>
-</head> 
-<body class="bg-gradient-to-b from-primary via-blue-700 to-secondary text-white min-h-screen flex flex-col"> 
- 
-  <!-- Header --> 
-  <header class="p-6 text-center relative overflow-hidden">
-    <div class="absolute inset-0 bg-blue-800 opacity-20 z-0"></div>
-    <div class="relative z-10">
-      <h1 class="text-5xl font-bold tracking-tight mb-2 text-white drop-shadow-lg">BestWin</h1>
-      <p class="text-xl mt-2 text-blue-100">Pronostici sportivi intelligenti e gratuiti</p>
-      <div class="w-24 h-1 bg-blue-400 mx-auto mt-4 rounded-full"></div>
-    </div>
-  </header> 
- 
-  <!-- Main Content --> 
-  <main class="flex-1 container mx-auto px-4 py-8"> 
+      });
 
- 
-    <!-- Oddspedia Match Center Widget -->
-    <section class="mb-8">
-      <div class="bg-white bg-opacity-95 text-gray-800 rounded-2xl shadow-custom p-6 mt-6"> 
-        <div class="flex items-center mb-4">
-          <div class="w-1.5 h-6 bg-blue-600 rounded-full mr-3"></div>
-          <h2 class="text-2xl font-semibold text-primary">Risultati in Diretta</h2>
-        </div>
-        <div id="oddspedia-widget-match-center-9564744" class="mt-4">
-          <script>
-            window.oddspediaWidgetMatchCenter9564744 = { 
-              api_token: "979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593ae3", 
-              match_id: "9564744", 
-              type: "match-center", 
-              domain: "dragonscur.github.io/Bestwin/", 
-              selector: "oddspedia-widget-match-center-9564744", 
-              width: "0", 
-              theme: "0", 
-              odds_type: "1", 
-              language: "it", 
-              primary_color: "#283E5B", 
-              primary_color_opacity: "0.9", 
-              secondary_color: "#53647B", 
-              accent_color: "#00B1FF", 
-              font: "Roboto", 
-              logos: "true", 
-              image: "true", 
-              best_odds: "true", 
-              header: "true", 
-              odds: "true", 
-              featured_bookie: "0", 
-              limitVisibleOperators: "15" 
-            };
-          </script>
-          <a href="https://oddspedia.com" target="_blank">Powered by</a>
-          <script src="https://widgets.oddspedia.com/js/widget/init.js?widgetId=oddspediaWidgetMatchCenter9564744" async></script>
-        </div>
-      </div>
-    </section>
-    
-    <!-- Oddspedia Odds Comparison Widget --> 
-    <section class="mb-8">
-      <div class="bg-white bg-opacity-95 text-gray-800 rounded-2xl shadow-custom p-6 mt-6"> 
-        <div class="flex items-center mb-4">
-          <div class="w-1.5 h-6 bg-blue-600 rounded-full mr-3"></div>
-          <h2 class="text-2xl font-semibold text-primary">TORNEI</h2>
-        </div>
-        <div id="oddspedia-widget-odds-comparison-popular-false-sports-false-leagues-false" class="mt-4">
-          <script>
-            window.oddspediaWidgetOddsComparisonPopularSportsLeagues = { 
-              api_token: "979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593ae3", 
-              type: "odds-comparison", 
-              domain: "dragonscur.github.io/Bestwin/", 
-              selector: "oddspedia-widget-odds-comparison-popular-false-sports-false-leagues-false", 
-              width: "0", 
-              theme: "0", 
-              odds_type: "1", 
-              language: "it", 
-              primary_color: "#283E5B", 
-              accent_color: "#00B1FF", 
-              font: "Roboto", 
-              logos: "true", 
-              limit: "10", 
-              popular: "false", 
-              sports: "football,tennis,basketball", 
-              leagues: "", 
-            };
-          </script>
-          <a href="https://widgets.oddspedia.com/api/tournaments?api_token=979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593ae3&sport_id=1&lang=it" target="_blank">Powered by</a>
-          <script src="https://widgets.oddspedia.com/js/widget/init.js?widgetId=oddspediaWidgetOddsComparisonPopularSportsLeagues" async></script>
-        </div>
-      </div>
-    </section>
-    
+      // 高亮最优赔率
+      ['1','X','2'].forEach(col => {
+        let max = 0;
+        Array.from(table.rows).slice(1).forEach(row=>{
+          const val = parseFloat(row.cells[col==='1'?1:col==='X'?2:3].textContent)||0;
+          if(val>max) max=val;
+        });
+        Array.from(table.rows).slice(1).forEach(row=>{
+          const val = parseFloat(row.cells[col==='1'?1:col==='X'?2:3].textContent)||0;
+          if(val===max && val>0) row.cells[col==='1'?1:col==='X'?2:3].classList.add('best');
+        });
+      });
 
-    
-    <!-- Oddspedia API Integration Section --> 
-    <section class="mb-8">
-      <div class="bg-white bg-opacity-95 text-gray-800 rounded-2xl shadow-custom p-6 mt-6"> 
-        <div class="flex items-center mb-4">
-          <div class="w-1.5 h-6 bg-blue-600 rounded-full mr-3"></div>
-          <h2 class="text-2xl font-semibold text-primary">Dati Sportivi</h2>
-        </div>
-        <div id="oddspedia-widget-sports-data" class="mt-4">
-          <script>
-            window.oddspediaWidgetSportsData = { 
-              api_token: "979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593ae3", 
-              domain: "dragonscur.github.io/Bestwin/", 
-              type: "odds-comparison", 
-              selector: "oddspedia-widget-sports-data",
-              width: "0", 
-              theme: "0", 
-              odds_type: "1", 
-              language: "it", 
-              primary_color: "#283E5B", 
-              accent_color: "#00B1FF", 
-              font: "Roboto", 
-              logos: "true", 
-              limit: "10", 
-              popular: "true", 
-              sports: "football,tennis,basketball,esports,handball", 
-            }; 
-          </script>
-          <a href="https://oddspedia.com" target="_blank">Powered by</a>
-          <script src="https://widgets.oddspedia.com/js/widget/init.js?widgetId=oddspediaWidgetSportsData" async></script>
-        </div>
-        
-        <!-- API Integration Links -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-blue-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold text-primary mb-2">Sport API</h3>
-            <p class="text-sm text-gray-600 mb-2">Dati su tutti gli sport disponibili</p>
-            <a href="https://widgets.oddspedia.com/api/sports?api_token=979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593ae3&lang=it" 
-               class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center" target="_blank">
-              Accedi ai dati
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-          </div>
-          
-          <div class="bg-blue-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold text-primary mb-2">Tornei Calcio API</h3>
-            <p class="text-sm text-gray-600 mb-2">Dati sui tornei di calcio</p>
-            <a href="https://widgets.oddspedia.com/api/tournaments?api_token=979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593ae3&sport_id=1&lang=it" 
-               class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center" target="_blank">
-              Accedi ai dati
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-          </div>
-          
-          <div class="bg-blue-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold text-primary mb-2">Altri Tornei API</h3>
-            <p class="text-sm text-gray-600 mb-2">Dati su altri tornei sportivi</p>
-            <a href="https://widgets.oddspedia.com/api/tournaments?api_token=979c8606666865ca9068244c75a294a14a8682e112c2222ae06158593ae3&sport_id=2&lang=it" 
-               class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center" target="_blank">
-              Accedi ai dati
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main> 
-  
-  <!-- Footer --> 
-  <footer class="mt-16 bg-blue-900 bg-opacity-50 border-t border-blue-800/30 pt-10 pb-6"> 
-    <div class="container mx-auto px-4">
-      <div class="flex flex-col md:flex-row justify-between items-center mb-8">
-        <div class="mb-6 md:mb-0">
-          <h2 class="text-3xl font-bold text-white mb-2">BestWin</h2>
-          <p class="text-blue-200 max-w-md">La piattaforma leader per pronostici sportivi intelligenti e gratuiti</p>
-        </div>
-        <div class="flex space-x-4">
-          <a href="#" class="w-10 h-10 rounded-full bg-blue-800 hover:bg-blue-700 flex items-center justify-center transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-            </svg>
-          </a>
-          <a href="#" class="w-10 h-10 rounded-full bg-blue-800 hover:bg-blue-700 flex items-center justify-center transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
-            </svg>
-          </a>
-          <a href="#" class="w-10 h-10 rounded-full bg-blue-800 hover:bg-blue-700 flex items-center justify-center transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
-          </a>
-        </div>
-      </div>
-      
-      <div class="grid md:grid-cols-3 gap-8 mb-8">
-        <div>
-          <h3 class="text-lg font-semibold text-white mb-4">Link Rapidi</h3>
-          <ul class="space-y-2">
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Home</a></li>
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Pronostici</a></li>
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Statistiche</a></li>
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Blog</a></li>
-          </ul>
-        </div>
-        <div>
-          <h3 class="text-lg font-semibold text-white mb-4">Sport</h3>
-          <ul class="space-y-2">
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Calcio</a></li>
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Basket</a></li>
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Tennis</a></li>
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Formula 1</a></li>
-          </ul>
-        </div>
-        <div>
-          <h3 class="text-lg font-semibold text-white mb-4">Contatti</h3>
-          <ul class="space-y-2">
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Chi Siamo</a></li>
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Supporto</a></li>
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Privacy Policy</a></li>
-            <li><a href="#" class="text-blue-200 hover:text-white transition">Termini di Servizio</a></li>
-          </ul>
-        </div>
-      </div>
-      
-      <div class="border-t border-blue-800/30 pt-6 flex flex-col md:flex-row justify-between items-center">
-        <p class="text-sm text-blue-200 mb-4 md:mb-0">© 2025 BestWin - Tutti i diritti riservati</p>
-        <div class="flex items-center">
-          <a href="https://oddspedia.com" target="_blank" rel="nofollow" class="flex items-center hover:opacity-100 transition"> 
-            <span class="text-sm text-blue-200 mr-2">Powered by</span>
-            <img  
-              src="https://oddspedia.com/images/logo/logo-dark.svg"  
-              alt="Oddspedia Logo"  
-              class="h-6" 
-            > 
-          </a>
-        </div>
-      </div>
-    </div>
-  </footer> 
- 
+      div.appendChild(table);
+    }
 
-</body> 
+    // 其他盘口折叠显示
+    if(m.bookmakers && m.bookmakers.length > 0){
+      const otherDiv = document.createElement('div');
+      otherDiv.className = 'hidden';
+      m.bookmakers.forEach(b=>{
+        b.markets.forEach(market=>{
+          if(!['1X2','Over/Under','Goal Successivo'].includes(market.name)){
+            const p = document.createElement('p');
+            p.textContent = `${b.name} - ${market.name}`;
+            otherDiv.appendChild(p);
+          }
+        });
+      });
+      const toggleBtn = document.createElement('span');
+      toggleBtn.textContent = 'Mostra altri mercati';
+      toggleBtn.className = 'toggle-btn';
+      toggleBtn.addEventListener('click', ()=>{
+        if(otherDiv.classList.contains('hidden')){
+          otherDiv.classList.remove('hidden');
+          toggleBtn.textContent = 'Nascondi altri mercati';
+        } else {
+          otherDiv.classList.add('hidden');
+          toggleBtn.textContent = 'Mostra altri mercati';
+        }
+      });
+      div.appendChild(toggleBtn);
+      div.appendChild(otherDiv);
+    }
+
+    container.appendChild(div);
+  });
+}
+
+// 事件绑定
+document.getElementById('sportSelect').addEventListener('change', (e) => {
+  currentSport = e.target.value;
+  loadTournaments(currentSport);
+});
+
+document.getElementById('tournamentSelect').addEventListener('change', (e) => {
+  currentLeague = e.target.value;
+  loadMatches(currentLeague);
+});
+
+document.getElementById('refreshBtn').addEventListener('click', () => {
+  if(currentLeague) loadMatches(currentLeague);
+});
+
+// 初始化加载
+loadTournaments(currentSport);
+
+// 自动刷新每 15 秒
+setInterval(() => {
+  if(currentLeague) loadMatches(currentLeague);
+}, 15000);
+
+</script>
+
+</body>
 </html>
